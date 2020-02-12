@@ -137,6 +137,18 @@ class DataArray(np.ndarray):
         if obj is None: return
         self.name = getattr(obj, 'name', None)
         self.unit = getattr(obj, 'unit', None)
+        self._label = None
+
+    @property
+    def label(self):
+        if self._label is None:
+            return self.name + " " + self.unit
+        else:
+            return self._label
+
+    @label.setter
+    def label(self, val):
+        self._label = val
 
 
 class DataSet(object):
