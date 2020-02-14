@@ -21,7 +21,7 @@ def fread(file, n, dtype):
     return ret
 
 
-def ReadFASTBinary(FileName):
+def ReadFASTBinary(FileName, print_desc_str=False):
     """Read metadata and data from binary FAST files (.outb)
 
     This implementation is a translated copy of the MATLAB function 
@@ -36,6 +36,9 @@ def ReadFASTBinary(FileName):
     ---------
     FileName : str
         Name of the binary FAST output file.
+    print_desc_str : Optional[bool]
+        Print the description string after reading the metadata and before
+        attempting to read the time and channel data.
     
     Returns
     -------
@@ -86,8 +89,9 @@ def ReadFASTBinary(FileName):
             ChanUnitASCII = fread(fid, LenUnit, np.uint8)   # ChanUnit converted to numeric ASCII
             ChanUnit.append("".join(map(chr, ChanUnitASCII)).strip())
 
-        print("Reading from the file ", FileName, "with heading: ")
-        print('    "', DescStr, '".')
+        if print_desc_str:
+            print("Reading from the file ", FileName, "with heading: ")
+            print('    "', DescStr, '".')
 
         #----------------------------
         # get the channel time series
@@ -120,6 +124,31 @@ class DataArray(np.ndarray):
     FAST data channels has a channel name and unit. The DataArray
     object has `name` and `unit` properties to ease data processing.
 
+    Note that a DataArray created from another DataArray will loose 
+    metadata, for instance
+        >>> azimuth_deg = DataArray(data, name="Azimuth", unit="(deg)")
+        >>> print(azimuth_deg.name, azimuth_deg.unit)
+            "Azimuth" "(deg)"
+        >>> azimuth_rad = azimuth_deg / 180 * np.pi
+        >>> print(azimuth_rad.name, azimuth_rad.unit)
+            None None
+    
+    The metadata can be set manually
+        >>> azimuth_rad.name = "Azimuth"
+        >>> azimuth_rad.unit = "(rad)"
+        >>> print(azimuth_rad.name, azimuth_rad.unit)
+            "Azimuth" "(rad)"
+    
+    or copied by the copy_metadata method.
+        >>> azimuth_rad.copy_metadata(azimuth_deg)
+        >>> print(azimuth_rad.name, azimuth_rad.unit)
+            "Azimuth" "(deg)"
+        >>> azimuth_rad.unit = "(rad)"
+        >>> print(azimuth_rad.name, azimuth_rad.unit)
+            "Azimuth" "(rad)"
+
+        
+
     Properties
     ----------
     name : str
@@ -131,18 +160,30 @@ class DataArray(np.ndarray):
         obj = np.asarray(data).view(cls)
         obj.name = name
         obj.unit = unit
+        obj._label = None
         return obj
 
     def __array_finalize__(self, obj):
         if obj is None: return
+        self.name = None
+        self.unit = None
+        self._label = None
+
+    def copy_metadata(self, obj):
+        """
+        
+        """
         self.name = getattr(obj, 'name', None)
         self.unit = getattr(obj, 'unit', None)
-        self._label = None
+        self._label = getattr(obj, '_label', None)
 
     @property
     def label(self):
-        if self._label is None:
-            return self.name + " " + self.unit
+        if (self._label is None):
+            try:
+                return self.name + " " + self.unit
+            except TypeError:
+                return None
         else:
             return self._label
 
@@ -154,8 +195,11 @@ class DataArray(np.ndarray):
 class DataSet(object):
     """DataSet organizes data from FAST simulations.
 
-    Access data channels by name, e.g. DataSet.Time refers directly
-    to the DataArray with channel name Time. 
+    Access data channels as a property of the DataSet object, 
+    e.g. DataSet.Time refers directly to the DataArray with channel 
+    name Time. Any channelname with an illegal property name character, 
+    e.g. "-ReactFXss" contains the python operator "-", will be changed 
+    by removing the illegal character.
 
     Use `load` method to load binary .outb files from FAST 
     simulations.
@@ -177,9 +221,16 @@ class DataSet(object):
         self.dataarrays = []
         for i in range(len(names)):
             dataarr = DataArray(arrays[:, i], name=names[i], unit=units[i])
-            self.__dict__[names[i]] = dataarr
+            dname = self._clean_dname(names[i])
+            self.__dict__[dname] = dataarr
             self.dataarrays.append(dataarr)
 
+    @staticmethod
+    def _clean_dname(dname):
+        name = dname
+        for illegal_char in ["-", "+", "*", "/"]:
+                name = name.replace(illegal_char, "")
+        return name
     @property
     def names(self):
-        return [da.name for da in self.dataarrays if da.name is not None]
+        return [self._clean_dname(da.name) for da in self.dataarrays if da.name is not None]

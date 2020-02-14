@@ -93,6 +93,54 @@ The resulting image from the example above is given below, see `example.py`
 |example_img|
 
 
+Parametrizing FAST input files 
+..............................
+
+The package contains template formatters to help parametrize FAST simulations.
+The `TemplateString` class takes in a template string and substitute template 
+keys (${}) with instance properties, see below.
+
+
+.. code:: python
+
+    import fastlib
+    
+
+    template_str = """------- FAST v8.16.* INPUT FILE ------------------------------------------------
+   ${description}
+   ---------------------- SIMULATION CONTROL --------------------------------------
+   ${Echo}         Echo            - Echo input data to <RootName>.ech (flag)
+   "FATAL"       AbortLevel      - Error level when simulation should abort (string) {"WARNING", "SEVERE", "FATAL"}
+   ${TMax}   TMax            - Total run time (s)
+         0.005   DT              - Recommended module time step (s)
+            2   InterpOrder     - Interpolation order for input/output time history (-) {1=linear, 2=quadratic}
+            0   NumCrctn        - Number of correction iterations (-) {0=explicit calculation, i.e., no corrections}
+         99999   DT_UJac         - Time between calls to get Jacobians (s)
+         1E+06   UJacSclFact     - Scaling factor used in Jacobians (-)
+    """
+
+    fmter = fastlib.TemplateStringFormatter(template_str)
+    fmter.Echo = False
+    fmter.TMax = 90
+
+    print(fmter.substitute())
+   
+
+which yields the following output::
+
+      ------- FAST v8.16.* INPUT FILE ------------------------------------------------
+      ${description}
+      ---------------------- SIMULATION CONTROL --------------------------------------
+      False         Echo            - Echo input data to <RootName>.ech (flag)
+      "FATAL"       AbortLevel      - Error level when simulation should abort (string) {"WARNING", "SEVERE", "FATAL"}
+               90   TMax            - Total run time (s)
+            0.005   DT              - Recommended module time step (s)
+                2   InterpOrder     - Interpolation order for input/output time history (-) {1=linear, 2=quadratic}
+                0   NumCrctn        - Number of correction iterations (-) {0=explicit calculation, i.e., no corrections}
+            99999   DT_UJac         - Time between calls to get Jacobians (s)
+            1E+06   UJacSclFact     - Scaling factor used in Jacobians (-)
+
+
 Support
 -------
 
