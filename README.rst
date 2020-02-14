@@ -97,7 +97,7 @@ Parametrizing FAST input files
 ..............................
 
 The package contains template formatters to help parametrize FAST simulations.
-The `TemplateString` class takes in a template string and substitute template 
+The `TemplateStringFormatter` class takes in a template string and substitute template 
 keys (${}) with instance properties, see below.
 
 
