@@ -105,7 +105,6 @@ keys (${}) with instance properties, see below.
 
     import fastlib
     
-
     template_str = """------- FAST v8.16.* INPUT FILE ------------------------------------------------
    ${description}
    ---------------------- SIMULATION CONTROL --------------------------------------
@@ -120,6 +119,7 @@ keys (${}) with instance properties, see below.
     """
 
     fmter = fastlib.TemplateStringFormatter(template_str)
+    fmter.description = "This is a demonstration of the TemplateStringFormatter class"
     fmter.Echo = False
     fmter.TMax = 90
 
@@ -129,7 +129,7 @@ keys (${}) with instance properties, see below.
 which yields the following output::
 
       ------- FAST v8.16.* INPUT FILE ------------------------------------------------
-      ${description}
+      This is a demonstration of the TemplateStringFormatter class
       ---------------------- SIMULATION CONTROL --------------------------------------
       False         Echo            - Echo input data to <RootName>.ech (flag)
       "FATAL"       AbortLevel      - Error level when simulation should abort (string) {"WARNING", "SEVERE", "FATAL"}
@@ -139,6 +139,11 @@ which yields the following output::
                 0   NumCrctn        - Number of correction iterations (-) {0=explicit calculation, i.e., no corrections}
             99999   DT_UJac         - Time between calls to get Jacobians (s)
             1E+06   UJacSclFact     - Scaling factor used in Jacobians (-)
+
+
+Note that the `TemplateStringFormatter.write(fname)` can write the substituted string directly to a file `fname`. There 
+also exists a `TemplateFileFormatter` class that can read in a template string from a separate file rather than
+a template string defined within the code.
 
 
 Support
