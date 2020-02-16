@@ -1,5 +1,6 @@
 #-*- coding: utf-8 -*-
 import numpy as np
+import re
 
 
 __all__ = ["ReadFASTBinary", "DataArray", "DataSet"]
@@ -206,6 +207,7 @@ class DataSet(object):
     """
     def __init__(self, dataarrays=None, description=None):
         self.dataarrays = None
+        self.verbose_description = None
         self.description = None
 
     def load(self, filename):
@@ -216,8 +218,11 @@ class DataSet(object):
         filename : str
             Name of binary output file from FAST simulations.
         """
-        arrays, names, units, _, desc = ReadFASTBinary(filename)
-        self.description = desc
+        arrays, names, units, _, full_desc = ReadFASTBinary(filename)
+
+        regex = "Description from the FAST input file: (.*$)"
+        self.description = re.findall(regex, full_desc)[0]
+        self.verbose_description = full_desc
         self.dataarrays = []
         for i in range(len(names)):
             dataarr = DataArray(arrays[:, i], name=names[i], unit=units[i])

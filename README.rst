@@ -146,6 +146,27 @@ also exists a `TemplateFileFormatter` class that can read in a template string f
 a template string defined within the code.
 
 
+Multiprocessing
+...............
+
+The multiprocessing module provides the `MultiProcessHandler` class to help submit a series of FAST input files to a 
+specified number of cpus. 
+
+.. code:: python
+
+    import fastlib
+    
+    # Assume that we have four FAST input files in the working directory
+    fst_files = ["Test18.fst", "Test19.fst", "Test20.fst", "Test21.fst"]
+    
+    # Create a handler with 4 cpus to process the input files with the "fast" executable.
+    mphdlr = fastlib.multiprocessing.MultiProcessHandler(fst_files, ncpu=4, binary_name="fast")
+
+    # Start the handler, all files in the list fst_files are now run in cmd line with the 
+    # command: fast <fst_file> on the four cpus.
+    mphdlr.start()
+
+
 Support
 -------
 
