@@ -4,4 +4,4 @@ from ._template import *
 from . import multiprocessing
 
 
-__version__ = "0.0.3"
+__version__ = "0.0.4"

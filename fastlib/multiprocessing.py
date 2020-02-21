@@ -9,28 +9,28 @@ import sys
 logger = logging.getLogger("fastlib.multiprocessing")
 
 class MultiProcessHandler:
+    """MultiProcessHandler distributes input files to a cpu pool.
+
+    MultiProcessHandler takes in a input_files, sets up a processing
+    pool, distributes the input files to the processes which runs 
+    the command 
+    
+        binary_name input_file 
+    
+    in the shell.
+
+    Arguments
+    ---------
+    input_files : list[str]
+        A list of strings to the input files.
+    ncpus : Optional[int]
+        Number of cpus to use in the simulations.
+    binary_name : Optional[str]   
+        Name of binary/executable to send the input files to. 
+    stream : Optional[fileobj]
+        File object to report the results from the processes.
+    """
     def __init__(self, input_files, ncpus=2, binary_name='fast', stream=sys.stdout):
-        """MultiProcessHandler distributes input files to a cpu pool.
-
-        MultiProcessHandler takes in a input_files, sets up a processing
-        pool, distributes the input files to the processes which runs 
-        the command 
-        
-            binary_name input_file 
-        
-        in the shell.
-
-        Arguments
-        ---------
-        input_files : list[str]
-            A list of strings to the input files.
-        ncpus : Optional[int]
-            Number of cpus to use in the simulations.
-        binary_name : Optional[str]   
-            Name of binary/executable to send the input files to. 
-        stream : Optional[fileobj]
-            File object to report the results from the processes.
-        """
         self.input_files = input_files
         self.ncpus = ncpus
         self.binary_name = binary_name

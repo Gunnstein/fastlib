@@ -206,9 +206,9 @@ class DataSet(object):
     simulations.
     """
     def __init__(self, dataarrays=None, description=None):
-        self.dataarrays = None
-        self.verbose_description = None
-        self.description = None
+        self.dataarrays = dataarrays
+        self.verbose_description = description
+        self.description = description
 
     def load(self, filename):
         """Load data from FAST binary file.
