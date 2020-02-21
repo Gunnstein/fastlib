@@ -207,6 +207,8 @@ class DataSet(object):
     """
     def __init__(self, dataarrays=None, description=None):
         self.dataarrays = dataarrays
+        for da in dataarrays:
+            self.__dict__[da.name] = da
         self.verbose_description = description
         self.description = description
 
